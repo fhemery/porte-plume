@@ -1,5 +1,6 @@
 import { SocketInteractionAdapter } from '../../infrastructure/socket-interaction/socket-interaction-adapter';
 import { InteractionBuilder } from './interaction-builder';
+import { getTag } from './test-utils';
 
 describe('Ping interaction', () => {
   let socketInteractionAdapter: SocketInteractionAdapter;
@@ -23,6 +24,6 @@ describe('Ping interaction', () => {
       .build();
     const result = await socketInteractionAdapter.process(interaction);
 
-    expect(result.message).toBe(`@${interaction.user.id} Pong!`);
+    expect(result.message).toBe(`${getTag(interaction)}Pong!`);
   });
 });

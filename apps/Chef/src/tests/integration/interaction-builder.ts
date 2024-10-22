@@ -1,16 +1,46 @@
-import { Interaction } from '../../domain/model/interaction';
+import {
+  Interaction,
+  InteractionOptions,
+} from '../../domain/model/interaction';
+
+export class InteractionOptionsFakeImpl implements InteractionOptions {
+  private _subcommand: string | undefined;
+  private _numberFields: Map<string, number> = new Map();
+
+  constructor(subcommand?: string) {
+    this._subcommand = subcommand;
+  }
+
+  getNumber(fieldName: string): number | undefined {
+    return this._numberFields.get(fieldName);
+  }
+
+  setNumberField(fieldName: string, value: number): void {
+    this._numberFields.set(fieldName, value);
+  }
+
+  setSubcommand(subcommand: string): void {
+    this._subcommand = subcommand;
+  }
+
+  getSubcommand(): string | undefined {
+    return this._subcommand;
+  }
+}
 
 export class InteractionBuilder {
   private _command: string;
   private _userId = 'alice';
   private _guildId: string | undefined = undefined;
+  private _options: InteractionOptionsFakeImpl;
 
-  private constructor(command: string) {
+  private constructor(command: string, subcommand?: string) {
     this._command = command;
+    this._options = new InteractionOptionsFakeImpl(subcommand);
   }
 
-  static Default(command: string): InteractionBuilder {
-    return new InteractionBuilder(command);
+  static Default(command: string, subcommand?: string): InteractionBuilder {
+    return new InteractionBuilder(command, subcommand);
   }
 
   withCommand(command: string): InteractionBuilder {
@@ -28,10 +58,16 @@ export class InteractionBuilder {
     return this;
   }
 
+  withNumberOption(fieldName: string, value: number): InteractionBuilder {
+    this._options.setNumberField(fieldName, value);
+    return this;
+  }
+
   build(): Interaction {
     return {
       commandName: this._command,
       user: { id: this._userId },
+      options: this._options,
       guildId: this._guildId,
     };
   }
