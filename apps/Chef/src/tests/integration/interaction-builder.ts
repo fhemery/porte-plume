@@ -6,6 +6,7 @@ import {
 export class InteractionOptionsFakeImpl implements InteractionOptions {
   private _subcommand: string | undefined;
   private _numberFields: Map<string, number> = new Map();
+  private _stringFields: Map<string, string> = new Map();
 
   constructor(subcommand?: string) {
     this._subcommand = subcommand;
@@ -13,6 +14,10 @@ export class InteractionOptionsFakeImpl implements InteractionOptions {
 
   getNumber(fieldName: string): number | undefined {
     return this._numberFields.get(fieldName);
+  }
+
+  getString(fieldName: string): string | undefined {
+    return this._stringFields.get(fieldName);
   }
 
   setNumberField(fieldName: string, value: number): void {
@@ -25,6 +30,10 @@ export class InteractionOptionsFakeImpl implements InteractionOptions {
 
   getSubcommand(): string | undefined {
     return this._subcommand;
+  }
+
+  setStringField(fieldName: string, value: string) {
+    this._stringFields.set(fieldName, value);
   }
 }
 
@@ -70,5 +79,10 @@ export class InteractionBuilder {
       options: this._options,
       guildId: this._guildId,
     };
+  }
+
+  withStringOption(fieldName: string, value: string): InteractionBuilder {
+    this._options.setStringField(fieldName, value);
+    return this;
   }
 }

@@ -1,5 +1,6 @@
 import { Interaction, InteractionResponse } from '../../../model/interaction';
 import { CountStoragePort } from '../../out/count-storage.port';
+import { WordCount } from '../../../model/count';
 
 export class CountUsecases {
   constructor(private readonly _countStorage: CountStoragePort) {}
@@ -12,6 +13,8 @@ export class CountUsecases {
         return this.view(interaction);
       case 'reset':
         return this.reset(interaction);
+      case 'objectif':
+        return this.setObjective(interaction);
       default:
         return Promise.resolve({ message: '[Compte] Sous-commande inconnue!' });
     }
@@ -26,9 +29,10 @@ export class CountUsecases {
     await this._countStorage.saveCount(userId, newCount);
 
     const prefix = interaction.guildId ? `@${userId} ` : '';
+    const suffix = this.computeReportSuffix(newCount);
 
     return Promise.resolve({
-      message: `${prefix}Ajout de ${nbWords} mots au décompte, ${existingCount.count} -> ${newCount.count}`,
+      message: `${prefix}Ajout de ${nbWords} mots au décompte, ${existingCount.count} -> ${newCount.count}${suffix}`,
     });
   }
 
@@ -51,9 +55,63 @@ export class CountUsecases {
     const existingCount = await this._countStorage.getCount(userId);
 
     const prefix = interaction.guildId ? `@${userId} ` : '';
+    const suffix = this.computeReportSuffix(existingCount);
 
     return Promise.resolve({
-      message: `${prefix}Total de mots : ${existingCount.count}`,
+      message: `${prefix}Total de mots : ${existingCount.count}${suffix}`,
     });
+  }
+
+  private async setObjective(
+    interaction: Interaction
+  ): Promise<InteractionResponse> {
+    const nbWords = interaction.options.getNumber('nombre-de-mots') || 0;
+    const eventName = interaction.options.getString('évènement') || undefined;
+    const userId = interaction.user.id;
+    const existingCount = await this._countStorage.getCount(userId);
+    const newCount = existingCount.setObjective(nbWords, eventName);
+    await this._countStorage.saveCount(userId, newCount);
+
+    if (nbWords === 0) {
+      return Promise.resolve({
+        message: `Objectif désactivé. Travailler sans pression, c'est bien aussi !`,
+      });
+    }
+
+    return Promise.resolve({
+      message: `Objectif fixé à : **${nbWords} mots**. Au travail, go go go !`,
+    });
+  }
+
+  private computeReportSuffix(existingCount: WordCount): string {
+    if (!existingCount.objective) {
+      return '';
+    }
+    const ratio = Math.round(
+      (existingCount.count / existingCount.objective) * 100
+    );
+    const ratioStr = ` / ${existingCount.objective} (${ratio}%)`;
+
+    let eventSuffix = '';
+    const today = new Date();
+    if (existingCount.eventName === 'MoMo' && today.getMonth() === 10) {
+      const dayNumber = today.getDate();
+      const expectedRatio = Math.round((dayNumber / 30) * 100);
+
+      eventSuffix = `. Progression évènement : ${expectedRatio}%`;
+
+      if (expectedRatio > ratio + 10) {
+        eventSuffix += ". Allez, on ne lâche rien, ce n'est pas fini !";
+      } else if (expectedRatio >= ratio) {
+        eventSuffix += ". Un peu de retard, mais rien d'inquiétant !";
+      } else if (expectedRatio >= ratio - 10) {
+        eventSuffix += '. Tu es au top !';
+      } else {
+        eventSuffix +=
+          '. Piece of Cake, comme ils disent au Nord de la Manche !';
+      }
+    }
+
+    return `${ratioStr}${eventSuffix}`;
   }
 }

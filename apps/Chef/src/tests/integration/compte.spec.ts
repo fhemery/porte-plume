@@ -146,6 +146,83 @@ describe('Compte interaction', () => {
         expect(result.message).toContain('Total de mots : 100 / 500 (20%)');
       });
     });
+
+    describe('when user has set MoMo has objective', () => {
+      beforeEach(async () => {
+        const objective = InteractionBuilder.Default('compte', 'objectif')
+          .withNumberOption('nombre-de-mots', 500)
+          .withStringOption('évènement', 'MoMo')
+          .build();
+        await socketInteractionAdapter.process(objective);
+      });
+
+      it('should not output anything if we are not in November', async () => {
+        const viewWord = InteractionBuilder.Default('compte', 'voir').build();
+
+        await socketInteractionAdapter.process(viewWord);
+        const result = await socketInteractionAdapter.process(viewWord);
+
+        expect(result.message).toBe('Total de mots : 0 / 500 (0%)');
+      });
+
+      it('should input a ratio if we are in November', async () => {
+        jest.useFakeTimers().setSystemTime(new Date('2024-11-10'));
+
+        const objective = InteractionBuilder.Default('compte', 'objectif')
+          .withNumberOption('nombre-de-mots', 500)
+          .withStringOption('évènement', 'MoMo')
+          .build();
+        const viewWord = InteractionBuilder.Default('compte', 'voir').build();
+
+        await socketInteractionAdapter.process(objective);
+        const result = await socketInteractionAdapter.process(viewWord);
+
+        expect(result.message).toContain(
+          'Total de mots : 0 / 500 (0%). Progression évènement : 33%'
+        );
+      });
+
+      it.each([
+        {
+          ratio: -11,
+          message: ". Allez, on ne lâche rien, ce n'est pas fini !",
+        },
+        {
+          ratio: -5,
+          message: ". Un peu de retard, mais rien d'inquiétant !",
+        },
+        { ratio: 5, message: '. Tu es au top !' },
+        {
+          ratio: 11,
+          message: '. Piece of Cake, comme ils disent au Nord de la Manche !',
+        },
+      ])(
+        'should put correct encouragement message ($ratio%)',
+        async ({ ratio, message }) => {
+          const targetWordCount = 50000;
+          jest.useFakeTimers().setSystemTime(new Date('2024-11-10'));
+
+          const objective = InteractionBuilder.Default('compte', 'objectif')
+            .withNumberOption('nombre-de-mots', targetWordCount)
+            .withStringOption('évènement', 'MoMo')
+            .build();
+          const addWord = InteractionBuilder.Default('compte', 'ajoute')
+            .withNumberOption(
+              'nombre-de-mots',
+              Math.round(targetWordCount * (0.33 + ratio / 100))
+            )
+            .build();
+          const viewWord = InteractionBuilder.Default('compte', 'voir').build();
+
+          await socketInteractionAdapter.process(objective);
+          await socketInteractionAdapter.process(addWord);
+          await socketInteractionAdapter.process(viewWord);
+          const result = await socketInteractionAdapter.process(viewWord);
+
+          expect(result.message).toContain(message);
+        }
+      );
+    });
   });
 
   describe('[reset] when user wants to reset word count', () => {

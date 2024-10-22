@@ -8,6 +8,7 @@ export interface Interaction {
 export interface InteractionOptions {
   getSubcommand(): string | undefined;
   getNumber(fieldName: string): number | undefined;
+  getString(fieldName: string): string | undefined;
 }
 
 export interface InteractionResponse {

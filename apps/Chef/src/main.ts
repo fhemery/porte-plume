@@ -43,6 +43,15 @@ const wordCountCommand = new SlashCommandBuilder()
           .setDescription('Le nombre de mots cible. 0 pour annuler')
           .setRequired(true)
       )
+      .addStringOption((option) =>
+        option
+          .setName('évènement')
+          .setDescription(
+            "le nom de l'événement associé. Valeur possible : MoMo"
+          )
+          .setRequired(false)
+          .addChoices([{ name: 'MoMo', value: 'MoMo' }])
+      )
   )
   .addSubcommand((subcommand) =>
     subcommand.setName('reset').setDescription('Réinitialise le décompte')
@@ -57,12 +66,11 @@ const rest = new REST({ version: '10' }).setToken(token!);
   try {
     console.log('Started refreshing application (/) commands.');
 
-    console.log(JSON.stringify(wordCountCommand.toJSON()));
-    const response = await rest.put(Routes.applicationCommands(clientId!), {
+    await rest.put(Routes.applicationCommands(clientId!), {
       body: [pingCommand.toJSON(), wordCountCommand.toJSON()],
     });
 
-    console.log('Successfully reloaded application (/) commands.', response);
+    console.log('Successfully reloaded application (/) commands.');
   } catch (error) {
     console.error(error);
   }
