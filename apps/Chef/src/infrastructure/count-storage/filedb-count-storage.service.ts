@@ -15,7 +15,11 @@ export class FiledbCountStorageService implements CountStoragePort {
       const currentValue = await this.db.getData(
         FiledbCountStorageService.prefix + userId
       );
-      return new WordCount(currentValue.count, currentValue.objective);
+      return new WordCount(
+        currentValue.count,
+        currentValue.objective,
+        currentValue.eventName
+      );
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e: unknown) {
       return new WordCount();

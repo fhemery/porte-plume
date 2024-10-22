@@ -156,13 +156,15 @@ describe('Compte interaction', () => {
         await socketInteractionAdapter.process(objective);
       });
 
-      it('should not output anything if we are not in November', async () => {
+      it('should warn that challenge has not started', async () => {
         const viewWord = InteractionBuilder.Default('compte', 'voir').build();
 
         await socketInteractionAdapter.process(viewWord);
         const result = await socketInteractionAdapter.process(viewWord);
 
-        expect(result.message).toBe('Total de mots : 0 / 500 (0%)');
+        expect(result.message).toBe(
+          'Total de mots : 0 / 500 (0%). Dès que le MoMo commence, je te dirai où tu en es !'
+        );
       });
 
       it('should input a ratio if we are in November', async () => {
