@@ -5,7 +5,11 @@ export class WordCount {
     return new WordCount(this.count + nbWords, this.objective);
   }
 
-  reset() {
+  reset(): WordCount {
     return new WordCount(0, this.objective);
+  }
+
+  setObjective(nbWords: number): WordCount {
+    return new WordCount(this.count, nbWords);
   }
 }

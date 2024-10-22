@@ -34,6 +34,17 @@ const wordCountCommand = new SlashCommandBuilder()
       )
   )
   .addSubcommand((subcommand) =>
+    subcommand
+      .setName('objectif')
+      .setDescription("Fixe l'objectif de mots à atteindre")
+      .addNumberOption((option) =>
+        option
+          .setName('nombre-de-mots')
+          .setDescription('Le nombre de mots cible. 0 pour annuler')
+          .setRequired(true)
+      )
+  )
+  .addSubcommand((subcommand) =>
     subcommand.setName('reset').setDescription('Réinitialise le décompte')
   )
   .addSubcommand((subcommand) =>
@@ -46,11 +57,12 @@ const rest = new REST({ version: '10' }).setToken(token!);
   try {
     console.log('Started refreshing application (/) commands.');
 
-    await rest.put(Routes.applicationCommands(clientId!), {
+    console.log(JSON.stringify(wordCountCommand.toJSON()));
+    const response = await rest.put(Routes.applicationCommands(clientId!), {
       body: [pingCommand.toJSON(), wordCountCommand.toJSON()],
     });
 
-    console.log('Successfully reloaded application (/) commands.');
+    console.log('Successfully reloaded application (/) commands.', response);
   } catch (error) {
     console.error(error);
   }

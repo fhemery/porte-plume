@@ -58,6 +58,27 @@ describe('Compte interaction', () => {
         `${getTag(interaction)}Ajout de 5 mots au décompte, 0 -> 5`
       );
     });
+
+    describe('when user has defined an objective', () => {
+      it('should give additional information regarding the objective', async () => {
+        // Arrange
+        const objective = InteractionBuilder.Default('compte', 'objectif')
+          .withNumberOption('nombre-de-mots', 100)
+          .build();
+        const addWord = InteractionBuilder.Default('compte', 'ajoute')
+          .withNumberOption('nombre-de-mots', 5)
+          .build();
+
+        // Act
+        await socketInteractionAdapter.process(objective);
+        const result = await socketInteractionAdapter.process(addWord);
+
+        // Assert
+        expect(result.message).toContain(
+          'Ajout de 5 mots au décompte, 0 -> 5 / 100 (5%)'
+        );
+      });
+    });
   });
 
   describe('[voir] when user wants to see total of words', () => {
@@ -106,6 +127,25 @@ describe('Compte interaction', () => {
       // Assert
       expect(result.message).toBe(`${getTag(interaction)}Total de mots : 0`);
     });
+
+    describe('when user has set an objective', () => {
+      it('should return count vs ratio and objective', async () => {
+        const objective = InteractionBuilder.Default('compte', 'objectif')
+          .withNumberOption('nombre-de-mots', 500)
+          .build();
+        const addWord = InteractionBuilder.Default('compte', 'ajoute')
+          .withNumberOption('nombre-de-mots', 100)
+          .build();
+
+        const viewWord = InteractionBuilder.Default('compte', 'voir').build();
+
+        await socketInteractionAdapter.process(objective);
+        await socketInteractionAdapter.process(addWord);
+        const result = await socketInteractionAdapter.process(viewWord);
+
+        expect(result.message).toContain('Total de mots : 100 / 500 (20%)');
+      });
+    });
   });
 
   describe('[reset] when user wants to reset word count', () => {
@@ -152,6 +192,35 @@ describe('Compte interaction', () => {
       // Assert
       expect(result.message).toBe(
         `${getTag(interaction)}Réinitialisation du décompte`
+      );
+    });
+  });
+
+  describe('[objectif] when user wants to set an objective', () => {
+    it('should confirm that objective has been sent', async () => {
+      const interaction = InteractionBuilder.Default('compte', 'objectif')
+        .withNumberOption('nombre-de-mots', 100)
+        .build();
+
+      const result = await socketInteractionAdapter.process(interaction);
+
+      expect(result.message).toBe(
+        'Objectif fixé à : **100 mots**. Au travail, go go go !'
+      );
+    });
+
+    it('should send back a specific message is count is 0', async () => {
+      // Arrange
+      const interaction = InteractionBuilder.Default('compte', 'objectif')
+        .withNumberOption('nombre-de-mots', 0)
+        .build();
+
+      // Act
+      const result = await socketInteractionAdapter.process(interaction);
+
+      // Assert
+      expect(result.message).toBe(
+        "Objectif désactivé. Travailler sans pression, c'est bien aussi !"
       );
     });
   });
