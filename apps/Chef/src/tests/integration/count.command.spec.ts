@@ -2,7 +2,7 @@ import { SocketInteractionAdapter } from '../../infrastructure/socket-interactio
 import { InteractionBuilder } from './interaction-builder';
 import { InMemoryCountStorageService } from '../../infrastructure/count-storage/in-memory-count-storage.service';
 import { getTag } from './test-utils';
-import { $t } from '../../domain';
+import { $t, TranslationKey } from '../../domain';
 
 const countCommand = $t('wordCount.command.name');
 const addSubcommand = $t('wordCount.command.subCommands.add.name');
@@ -278,24 +278,31 @@ describe('Count command', () => {
       it.each([
         {
           ratio: -11,
-          message: $t('wordCount.view.objective.nano.progress.veryLate'),
+          message: 'wordCount.view.objective.nano.progress.veryLate',
         },
         {
           ratio: -5,
-          message: $t('wordCount.view.objective.nano.progress.slightlyLate'),
+          message: 'wordCount.view.objective.nano.progress.slightlyLate',
         },
         {
           ratio: 5,
-          message: $t('wordCount.view.objective.nano.progress.onTime'),
+          message: 'wordCount.view.objective.nano.progress.onTime',
         },
         {
           ratio: 11,
-          message: $t('wordCount.view.objective.nano.progress.wayAhead'),
+          message: 'wordCount.view.objective.nano.progress.wayAhead',
         },
       ])(
         'should put correct encouragement message ($ratio%)',
-        async ({ ratio, message }) => {
+        async ({
+          ratio,
+          message,
+        }: {
+          ratio: number;
+          message: TranslationKey;
+        }) => {
           const targetWordCount = 50000;
+          jest.spyOn(Math, 'random').mockReturnValue(0);
           jest.useFakeTimers().setSystemTime(new Date('2024-11-10'));
 
           const objective = InteractionBuilder.Default(
@@ -331,7 +338,7 @@ describe('Count command', () => {
             }
           );
           expect(result.message).toContain(
-            [eventProgressMessage, message].join(' ')
+            [eventProgressMessage, $t(message)].join(' ')
           );
         }
       );

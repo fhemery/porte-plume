@@ -5,7 +5,7 @@ export const frTranslations = {
       name: 'coucou',
       description: 'Dit bonjour',
     },
-    response: ['Coucou !', 'Salut !', 'Quoi de neuf ?'],
+    response: ['Coucou ! :wave:', 'Salut !', 'Quoi de neuf ?'],
   },
   wordCount: {
     command: {
@@ -86,10 +86,19 @@ export const frTranslations = {
           notStarted: 'Dès que le MoMo commence, je te dirais où tu en es.',
           started: 'Progression évènement : {{ratio}}%.',
           progress: {
-            veryLate: "Allez, on ne lâche rien, ce n'est pas fini !",
-            slightlyLate: "Un peu de retard, mais rien d'inquiétant !",
-            onTime: 'Tu es au top !',
-            wayAhead: 'Piece of Cake, comme ils disent au Nord de la Manche !',
+            veryLate: [
+              "Allez, on ne lâche rien, ce n'est pas fini ! :muscle:",
+              "Ne m'oblige pas à sortir le fouet à païllettes !:fouet: :sparkles:",
+            ],
+            slightlyLate: [
+              "Un peu de retard, mais rien d'inquiétant ! :stopwatch:",
+            ],
+            onTime: ['Tu es au top ! :thumbup:', 'Continue comme ça :clap:'],
+            wayAhead: [
+              'Piece of Cake, comme disent les anglais ! :cake:',
+              'À ce rythme, même Usain Bolt ne peut pas te rattraper :dash:',
+              'Une vraie fusée ! :rocket:',
+            ],
           },
         },
       },
