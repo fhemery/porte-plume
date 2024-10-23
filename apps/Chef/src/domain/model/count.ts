@@ -16,4 +16,12 @@ export class WordCount {
   setObjective(nbWords: number, eventName?: string): WordCount {
     return new WordCount(this.count, nbWords, eventName);
   }
+
+  setWordCount(nbWords: number): WordCount {
+    return new WordCount(nbWords, this.objective, this.eventName);
+  }
+
+  getObjectiveRatio(): number {
+    return Math.round((this.count / this.objective) * 100);
+  }
 }

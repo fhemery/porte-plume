@@ -57,6 +57,17 @@ const wordCountCommand = new SlashCommandBuilder()
     subcommand.setName('reset').setDescription('Réinitialise le décompte')
   )
   .addSubcommand((subcommand) =>
+    subcommand
+      .setName('déclare')
+      .setDescription('Déclare un nombre de mots. 0 pour réinitialiser')
+      .addNumberOption((option) =>
+        option
+          .setName('nombre-de-mots')
+          .setDescription('Le nombre de mots cible. 0 pour réinitialiser')
+          .setRequired(true)
+      )
+  )
+  .addSubcommand((subcommand) =>
     subcommand.setName('voir').setDescription('Voir le décompte')
   );
 

@@ -157,6 +157,7 @@ describe('Compte interaction', () => {
       });
 
       it('should warn that challenge has not started', async () => {
+        jest.useFakeTimers().setSystemTime(new Date('2024-10-10'));
         const viewWord = InteractionBuilder.Default('compte', 'voir').build();
 
         await socketInteractionAdapter.process(viewWord);
@@ -224,6 +225,104 @@ describe('Compte interaction', () => {
           expect(result.message).toContain(message);
         }
       );
+    });
+  });
+
+  describe('[déclare] Setting the word count', () => {
+    it('should tell user that count has been set', async () => {
+      // Arrange
+      const interaction = InteractionBuilder.Default('compte', 'déclare')
+        .withNumberOption('nombre-de-mots', 5)
+        .build();
+
+      // Act
+      const result = await socketInteractionAdapter.process(interaction);
+
+      // Assert
+      expect(result.message).toContain('Total de mots mis à jour : 5.');
+    });
+
+    it('should set the count to the number given', async () => {
+      // Arrange
+      const interaction = InteractionBuilder.Default('compte', 'déclare')
+        .withNumberOption('nombre-de-mots', 5)
+        .build();
+
+      // Act
+      await socketInteractionAdapter.process(interaction);
+      const result = await socketInteractionAdapter.process(
+        InteractionBuilder.Default('compte', 'voir').build()
+      );
+
+      // Assert
+      expect(result.message).toContain(': 5');
+    });
+
+    it('should tag user if message comes from guild', async () => {
+      // Arrange
+      const interaction = InteractionBuilder.Default('compte', 'déclare')
+        .withUser('bob')
+        .withGuild('1234')
+        .withNumberOption('nombre-de-mots', 5)
+        .build();
+
+      // Act
+      const result = await socketInteractionAdapter.process(interaction);
+
+      // Assert
+      expect(result.message).toContain(`${getTag(interaction)}`);
+    });
+
+    it('should add the number of added words compared to previous declaration if number is positive', async () => {
+      // Arrange
+      const interaction = InteractionBuilder.Default('compte', 'déclare')
+        .withNumberOption('nombre-de-mots', 5)
+        .build();
+      const addWord = InteractionBuilder.Default('compte', 'déclare')
+        .withNumberOption('nombre-de-mots', 10)
+        .build();
+
+      // Act
+      await socketInteractionAdapter.process(interaction);
+      const result = await socketInteractionAdapter.process(addWord);
+
+      // Assert
+      expect(result.message).toContain(
+        'Total de mots mis à jour : 10. Ça fait 5 mots ajoutés sur cette session !'
+      );
+    });
+
+    it('should set a special message if user declares 0 words', async () => {
+      const declaration = InteractionBuilder.Default('compte', 'déclare')
+        .withNumberOption('nombre-de-mots', 0)
+        .build();
+      const result = await socketInteractionAdapter.process(declaration);
+
+      expect(result.message).toBe(
+        'Ok, on repart de 0. Un nouveau jour, une nouvelle résolution !'
+      );
+    });
+
+    it('should add objective data if an objective is defined', async () => {
+      // Arrange
+      jest.useFakeTimers().setSystemTime(new Date('2024-10-10'));
+      const objective = InteractionBuilder.Default('compte', 'objectif')
+        .withNumberOption('nombre-de-mots', 100)
+        .withStringOption('évènement', 'MoMo')
+        .build();
+      const declaration = InteractionBuilder.Default('compte', 'déclare')
+        .withNumberOption('nombre-de-mots', 5)
+        .build();
+
+      // Act
+      await socketInteractionAdapter.process(objective);
+      const result = await socketInteractionAdapter.process(declaration);
+
+      // Assert
+      expect(result.message).toContain(
+        'Total de mots mis à jour : 5 / 100 (5%).'
+      );
+      expect(result.message).toContain(`Dès que le MoMo commence`);
     });
   });
 

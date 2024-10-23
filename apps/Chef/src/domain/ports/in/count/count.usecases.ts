@@ -16,6 +16,8 @@ export class CountUsecases {
         return this.reset(interaction);
       case 'objectif':
         return this.setObjective(interaction);
+      case 'déclare':
+        return this.setWordCount(interaction);
       default:
         return Promise.resolve({ message: '[Compte] Sous-commande inconnue!' });
     }
@@ -123,5 +125,32 @@ export class CountUsecases {
       eventSuffix += '. Piece of Cake, comme ils disent au Nord de la Manche !';
     }
     return eventSuffix;
+  }
+
+  private async setWordCount(
+    interaction: Interaction
+  ): Promise<InteractionResponse> {
+    const nbWords = interaction.options.getNumber('nombre-de-mots') || 0;
+    const userId = interaction.user.id;
+    const existingCount = await this._countStorage.getCount(userId);
+    const newCount = existingCount.setWordCount(nbWords);
+    await this._countStorage.saveCount(userId, newCount);
+
+    const prefix = interaction.guildId ? utils.getTag(userId) : '';
+    let body = 'Ok, on repart de 0. Un nouveau jour, une nouvelle résolution !';
+    if (nbWords > 0) {
+      body = `Total de mots mis à jour : ${nbWords}${this.computeReportSuffix(
+        newCount
+      )}.`;
+    }
+    if (nbWords > existingCount.count) {
+      body += ` Ça fait ${
+        nbWords - existingCount.count
+      } mots ajoutés sur cette session !`;
+    }
+
+    return {
+      message: `${prefix}${body}`,
+    };
   }
 }
