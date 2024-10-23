@@ -93,13 +93,13 @@ const wordCountCommand = new SlashCommandBuilder()
       .setDescription($t('wordCount.command.subCommands.view.description'))
   );
 
-const rest = new REST({ version: '10' }).setToken(token!);
+const rest = new REST({ version: '10' }).setToken(token || '');
 
 (async () => {
   try {
     console.log('Started refreshing application (/) commands.');
 
-    await rest.put(Routes.applicationCommands(clientId!), {
+    await rest.put(Routes.applicationCommands(clientId || ''), {
       body: [pingCommand.toJSON(), wordCountCommand.toJSON()],
     });
 
