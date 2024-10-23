@@ -53,7 +53,6 @@ export class CountUsecases {
       nbWords: existingCount.count.toString(10),
     });
     const fullMessage = [`${prefix}${message}`, ...suffix].join(' ');
-    console.log(fullMessage);
     return Promise.resolve({
       message: fullMessage,
     });
@@ -71,12 +70,14 @@ export class CountUsecases {
 
     if (nbWords === 0) {
       return Promise.resolve({
-        message: `Objectif désactivé. Travailler sans pression, c'est bien aussi !`,
+        message: $t('wordCount.objective.reset.message'),
       });
     }
 
     return Promise.resolve({
-      message: `Objectif fixé à : **${nbWords} mots**. Au travail, go go go !`,
+      message: $t('wordCount.objective.set.message', {
+        nbWords: nbWords.toString(10),
+      }),
     });
   }
 

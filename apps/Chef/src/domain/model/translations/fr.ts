@@ -57,6 +57,16 @@ export const frTranslations = {
       success:
         'Ajout de {{nbWords}} mots au décompte, {{initial}} -> {{total}}.',
     },
+    objective: {
+      set: {
+        message:
+          'Objectif fixé à : **{{nbWords}} mots**. Au travail, go go go !',
+      },
+      reset: {
+        message:
+          "Objectif désactivé. Travailler sans pression, c'est bien aussi !",
+      },
+    },
     set: {
       increase: {
         message: 'Ça fait {{nbWords}} mots ajoutés sur cette session !',

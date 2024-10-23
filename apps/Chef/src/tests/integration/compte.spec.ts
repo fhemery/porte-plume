@@ -393,9 +393,10 @@ describe('Compte interaction', () => {
 
       const result = await socketInteractionAdapter.process(interaction);
 
-      expect(result.message).toBe(
-        'Objectif fixé à : **100 mots**. Au travail, go go go !'
-      );
+      const expectedMessage = $t('wordCount.objective.set.message', {
+        nbWords: '100',
+      });
+      expect(result.message).toBe(expectedMessage);
     });
 
     it('should send back a specific message is count is 0', async () => {
@@ -408,9 +409,8 @@ describe('Compte interaction', () => {
       const result = await socketInteractionAdapter.process(interaction);
 
       // Assert
-      expect(result.message).toBe(
-        "Objectif désactivé. Travailler sans pression, c'est bien aussi !"
-      );
+      const expectedMessage = $t('wordCount.objective.reset.message');
+      expect(result.message).toBe(expectedMessage);
     });
   });
 });
