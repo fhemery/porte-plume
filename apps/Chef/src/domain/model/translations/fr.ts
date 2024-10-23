@@ -53,8 +53,34 @@ export const frTranslations = {
         },
       },
     },
-  },
-  objective: {
-    reached: 'Objectif atteint!',
+    add: {
+      success:
+        'Ajout de {{nbWords}} mots au décompte, {{initial}} -> {{total}}.',
+    },
+    set: {
+      increase: {
+        message: 'Ça fait {{nbWords}} mots ajoutés sur cette session !',
+      },
+      reset: {
+        message:
+          'Ok, on repart de 0. Un nouveau jour, une nouvelle résolution !',
+      },
+    },
+    view: {
+      baseMessage: 'Total de mots : {{nbWords}}.',
+      progress: 'Progression : {{nbWords}} / {{objective}} ({{progress}}%).',
+      objective: {
+        nano: {
+          notStarted: 'Dès que le MoMo commence, je te dirais où tu en es.',
+          started: 'Progression évènement : {{ratio}}%.',
+          progress: {
+            veryLate: "Allez, on ne lâche rien, ce n'est pas fini !",
+            slightlyLate: "Un peu de retard, mais rien d'inquiétant !",
+            onTime: 'Tu es au top !',
+            wayAhead: 'Piece of Cake, comme ils disent au Nord de la Manche !',
+          },
+        },
+      },
+    },
   },
 };

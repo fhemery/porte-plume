@@ -2,6 +2,7 @@ import { Interaction, InteractionResponse } from '../../../model/interaction';
 import { CountStoragePort } from '../../out/count-storage.port';
 import { WordCount } from '../../../model/count';
 import { utils } from '../../../model/utils';
+import { $t } from '../../../model';
 
 export class CountUsecases {
   constructor(private readonly _countStorage: CountStoragePort) {}
@@ -35,7 +36,11 @@ export class CountUsecases {
     const suffix = this.computeReportSuffix(newCount);
 
     return Promise.resolve({
-      message: `${prefix}Ajout de ${nbWords} mots au décompte, ${existingCount.count} -> ${newCount.count}${suffix}`,
+      message: `${prefix}${$t('wordCount.add.success', {
+        nbWords: nbWords.toString(10),
+        initial: existingCount.count.toString(10),
+        total: newCount.count.toString(10),
+      })}${suffix}`,
     });
   }
 
@@ -60,8 +65,13 @@ export class CountUsecases {
     const prefix = interaction.guildId ? utils.getTag(userId) : '';
     const suffix = this.computeReportSuffix(existingCount);
 
+    const message = $t('wordCount.view.baseMessage', {
+      nbWords: existingCount.count.toString(10),
+    });
+    const fullMessage = [`${prefix}${message}`, ...suffix].join(' ');
+    console.log(fullMessage);
     return Promise.resolve({
-      message: `${prefix}Total de mots : ${existingCount.count}${suffix}`,
+      message: fullMessage,
     });
   }
 
@@ -86,43 +96,56 @@ export class CountUsecases {
     });
   }
 
-  private computeReportSuffix(existingCount: WordCount): string {
+  private computeReportSuffix(existingCount: WordCount): string[] {
     if (!existingCount.objective) {
-      return '';
+      return [];
     }
     const ratio = Math.round(
       (existingCount.count / existingCount.objective) * 100
     );
-    const ratioStr = ` / ${existingCount.objective} (${ratio}%)`;
+    const progressStr = $t('wordCount.view.progress', {
+      nbWords: existingCount.count.toString(10),
+      objective: existingCount.objective.toString(10),
+      progress: ratio.toString(10),
+    });
 
     const eventSuffix = this.getMoMoDedicatedSuffix(existingCount, ratio);
 
-    return `${ratioStr}${eventSuffix}`;
+    return [progressStr, ...eventSuffix];
   }
 
-  private getMoMoDedicatedSuffix(existingCount: WordCount, ratio: number) {
+  private getMoMoDedicatedSuffix(
+    existingCount: WordCount,
+    ratio: number
+  ): string[] {
     if (existingCount.eventName !== 'MoMo') {
-      return '';
+      return [];
     }
 
     const today = new Date();
     if (today.getMonth() !== 10) {
-      return '. Dès que le MoMo commence, je te dirai où tu en es !';
+      return [$t('wordCount.view.objective.nano.notStarted')];
     }
 
     const dayNumber = today.getDate();
     const expectedRatio = Math.round((dayNumber / 30) * 100);
 
-    let eventSuffix = `. Progression évènement : ${expectedRatio}%`;
+    const eventSuffix = [
+      $t('wordCount.view.objective.nano.started', {
+        ratio: expectedRatio.toString(10),
+      }),
+    ];
 
     if (expectedRatio > ratio + 10) {
-      eventSuffix += ". Allez, on ne lâche rien, ce n'est pas fini !";
+      eventSuffix.push($t('wordCount.view.objective.nano.progress.veryLate'));
     } else if (expectedRatio >= ratio) {
-      eventSuffix += ". Un peu de retard, mais rien d'inquiétant !";
+      eventSuffix.push(
+        $t('wordCount.view.objective.nano.progress.slightlyLate')
+      );
     } else if (expectedRatio >= ratio - 10) {
-      eventSuffix += '. Tu es au top !';
+      eventSuffix.push($t('wordCount.view.objective.nano.progress.onTime'));
     } else {
-      eventSuffix += '. Piece of Cake, comme ils disent au Nord de la Manche !';
+      eventSuffix.push($t('wordCount.view.objective.nano.progress.wayAhead'));
     }
     return eventSuffix;
   }
@@ -136,21 +159,29 @@ export class CountUsecases {
     const newCount = existingCount.setWordCount(nbWords);
     await this._countStorage.saveCount(userId, newCount);
 
-    const prefix = interaction.guildId ? utils.getTag(userId) : '';
-    let body = 'Ok, on repart de 0. Un nouveau jour, une nouvelle résolution !';
-    if (nbWords > 0) {
-      body = `Total de mots mis à jour : ${nbWords}${this.computeReportSuffix(
-        newCount
-      )}.`;
+    const prefix = interaction.guildId ? [utils.getTag(userId)] : [];
+
+    if (nbWords === 0) {
+      return {
+        message: [...prefix, $t('wordCount.set.reset.message')].join(' '),
+      };
     }
+
+    const body = [
+      $t('wordCount.view.baseMessage', { nbWords: nbWords.toString(10) }),
+    ];
     if (nbWords > existingCount.count) {
-      body += ` Ça fait ${
-        nbWords - existingCount.count
-      } mots ajoutés sur cette session !`;
+      body.push(
+        $t('wordCount.set.increase.message', {
+          nbWords: (nbWords - existingCount.count).toString(10),
+        })
+      );
     }
 
     return {
-      message: `${prefix}${body}`,
+      message: [...prefix, ...body, ...this.computeReportSuffix(newCount)].join(
+        ' '
+      ),
     };
   }
 }

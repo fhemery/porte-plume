@@ -2,6 +2,7 @@ import { SocketInteractionAdapter } from '../../infrastructure/socket-interactio
 import { InteractionBuilder } from './interaction-builder';
 import { InMemoryCountStorageService } from '../../infrastructure/count-storage/in-memory-count-storage.service';
 import { getTag } from './test-utils';
+import { $t } from '../../domain';
 
 describe('Compte interaction', () => {
   let socketInteractionAdapter: SocketInteractionAdapter;
@@ -16,7 +17,6 @@ describe('Compte interaction', () => {
     it('should initialize a count if user did not have any', async () => {
       // Arrange
       const interaction = InteractionBuilder.Default('compte', 'ajoute')
-        .withUser('bob')
         .withNumberOption('nombre-de-mots', 5)
         .build();
 
@@ -24,7 +24,9 @@ describe('Compte interaction', () => {
       const result = await socketInteractionAdapter.process(interaction);
 
       // Assert
-      expect(result.message).toBe('Ajout de 5 mots au décompte, 0 -> 5');
+      expect(result.message).toBe(
+        $t('wordCount.add.success', { nbWords: '5', initial: '0', total: '5' })
+      );
     });
 
     it('should add to existing count if user has one', async () => {
@@ -39,13 +41,17 @@ describe('Compte interaction', () => {
       const result = await socketInteractionAdapter.process(interaction);
 
       // Assert
-      expect(result.message).toBe('Ajout de 5 mots au décompte, 5 -> 10');
+      const expectedMessage = $t('wordCount.add.success', {
+        nbWords: '5',
+        initial: '5',
+        total: '10',
+      });
+      expect(result.message).toBe(expectedMessage);
     });
 
     it('should tag user if command is launched from a guild', async () => {
       // Arrange
       const interaction = InteractionBuilder.Default('compte', 'ajoute')
-        .withUser('bob')
         .withGuild('1234')
         .withNumberOption('nombre-de-mots', 5)
         .build();
@@ -54,9 +60,12 @@ describe('Compte interaction', () => {
       const result = await socketInteractionAdapter.process(interaction);
 
       // Assert
-      expect(result.message).toBe(
-        `${getTag(interaction)}Ajout de 5 mots au décompte, 0 -> 5`
-      );
+      const expectedMessage = $t('wordCount.add.success', {
+        nbWords: '5',
+        initial: '0',
+        total: '5',
+      });
+      expect(result.message).toBe(`${getTag(interaction)}${expectedMessage}`);
     });
 
     describe('when user has defined an objective', () => {
@@ -74,9 +83,12 @@ describe('Compte interaction', () => {
         const result = await socketInteractionAdapter.process(addWord);
 
         // Assert
-        expect(result.message).toContain(
-          'Ajout de 5 mots au décompte, 0 -> 5 / 100 (5%)'
-        );
+        const progressMessage = $t('wordCount.view.progress', {
+          nbWords: '5',
+          objective: '100',
+          progress: '5',
+        });
+        expect(result.message).toContain(progressMessage);
       });
     });
   });
@@ -98,7 +110,10 @@ describe('Compte interaction', () => {
       const result = await socketInteractionAdapter.process(viewWord);
 
       //Assert
-      expect(result.message).toBe('Total de mots : 5');
+      const expectedMessage = $t('wordCount.view.baseMessage', {
+        nbWords: '5',
+      });
+      expect(result.message).toBe(expectedMessage);
     });
 
     it('should say 0 by default', async () => {
@@ -111,7 +126,10 @@ describe('Compte interaction', () => {
       const result = await socketInteractionAdapter.process(interaction);
 
       // Assert
-      expect(result.message).toBe('Total de mots : 0');
+      const expectedMessage = $t('wordCount.view.baseMessage', {
+        nbWords: '0',
+      });
+      expect(result.message).toBe(expectedMessage);
     });
 
     it('should tag user if message comes from guild', async () => {
@@ -125,7 +143,10 @@ describe('Compte interaction', () => {
       const result = await socketInteractionAdapter.process(interaction);
 
       // Assert
-      expect(result.message).toBe(`${getTag(interaction)}Total de mots : 0`);
+      const expectedMessage = $t('wordCount.view.baseMessage', {
+        nbWords: '0',
+      });
+      expect(result.message).toBe(`${getTag(interaction)}${expectedMessage}`);
     });
 
     describe('when user has set an objective', () => {
@@ -143,7 +164,12 @@ describe('Compte interaction', () => {
         await socketInteractionAdapter.process(addWord);
         const result = await socketInteractionAdapter.process(viewWord);
 
-        expect(result.message).toContain('Total de mots : 100 / 500 (20%)');
+        const expectedMessage = $t('wordCount.view.progress', {
+          nbWords: '100',
+          objective: '500',
+          progress: '20',
+        });
+        expect(result.message).toContain(expectedMessage);
       });
     });
 
@@ -163,8 +189,15 @@ describe('Compte interaction', () => {
         await socketInteractionAdapter.process(viewWord);
         const result = await socketInteractionAdapter.process(viewWord);
 
+        const totalMessage = $t('wordCount.view.baseMessage', { nbWords: '0' });
+        const progressMessage = $t('wordCount.view.progress', {
+          nbWords: '0',
+          objective: '500',
+          progress: '0',
+        });
+        const eventMessage = $t('wordCount.view.objective.nano.notStarted');
         expect(result.message).toBe(
-          'Total de mots : 0 / 500 (0%). Dès que le MoMo commence, je te dirai où tu en es !'
+          [totalMessage, progressMessage, eventMessage].join(' ')
         );
       });
 
@@ -180,24 +213,29 @@ describe('Compte interaction', () => {
         await socketInteractionAdapter.process(objective);
         const result = await socketInteractionAdapter.process(viewWord);
 
-        expect(result.message).toContain(
-          'Total de mots : 0 / 500 (0%). Progression évènement : 33%'
-        );
+        const ratioMessage = $t('wordCount.view.objective.nano.started', {
+          ratio: '33',
+        });
+
+        expect(result.message).toContain(ratioMessage);
       });
 
       it.each([
         {
           ratio: -11,
-          message: ". Allez, on ne lâche rien, ce n'est pas fini !",
+          message: $t('wordCount.view.objective.nano.progress.veryLate'),
         },
         {
           ratio: -5,
-          message: ". Un peu de retard, mais rien d'inquiétant !",
+          message: $t('wordCount.view.objective.nano.progress.slightlyLate'),
         },
-        { ratio: 5, message: '. Tu es au top !' },
+        {
+          ratio: 5,
+          message: $t('wordCount.view.objective.nano.progress.onTime'),
+        },
         {
           ratio: 11,
-          message: '. Piece of Cake, comme ils disent au Nord de la Manche !',
+          message: $t('wordCount.view.objective.nano.progress.wayAhead'),
         },
       ])(
         'should put correct encouragement message ($ratio%)',
@@ -222,7 +260,15 @@ describe('Compte interaction', () => {
           await socketInteractionAdapter.process(viewWord);
           const result = await socketInteractionAdapter.process(viewWord);
 
-          expect(result.message).toContain(message);
+          const eventProgressMessage = $t(
+            'wordCount.view.objective.nano.started',
+            {
+              ratio: '33',
+            }
+          );
+          expect(result.message).toContain(
+            [eventProgressMessage, message].join(' ')
+          );
         }
       );
     });
@@ -239,7 +285,8 @@ describe('Compte interaction', () => {
       const result = await socketInteractionAdapter.process(interaction);
 
       // Assert
-      expect(result.message).toContain('Total de mots mis à jour : 5.');
+      const baseMessage = $t('wordCount.view.baseMessage', { nbWords: '5' });
+      expect(result.message).toContain(baseMessage);
     });
 
     it('should set the count to the number given', async () => {
@@ -287,8 +334,12 @@ describe('Compte interaction', () => {
       const result = await socketInteractionAdapter.process(addWord);
 
       // Assert
+      const baseMessage = $t('wordCount.view.baseMessage', { nbWords: '10' });
+      const progressMessage = $t('wordCount.set.increase.message', {
+        nbWords: '5',
+      });
       expect(result.message).toContain(
-        'Total de mots mis à jour : 10. Ça fait 5 mots ajoutés sur cette session !'
+        [baseMessage, progressMessage].join(' ')
       );
     });
 
@@ -298,9 +349,8 @@ describe('Compte interaction', () => {
         .build();
       const result = await socketInteractionAdapter.process(declaration);
 
-      expect(result.message).toBe(
-        'Ok, on repart de 0. Un nouveau jour, une nouvelle résolution !'
-      );
+      const expectedMessage = $t('wordCount.set.reset.message');
+      expect(result.message).toBe(expectedMessage);
     });
 
     it('should add objective data if an objective is defined', async () => {
@@ -319,10 +369,19 @@ describe('Compte interaction', () => {
       const result = await socketInteractionAdapter.process(declaration);
 
       // Assert
-      expect(result.message).toContain(
-        'Total de mots mis à jour : 5 / 100 (5%).'
+      const baseMessage = $t('wordCount.view.baseMessage', { nbWords: '5' });
+      const increaseMessage = $t('wordCount.set.increase.message', {
+        nbWords: '5',
+      });
+      const progressMessage = $t('wordCount.view.progress', {
+        nbWords: '5',
+        objective: '100',
+        progress: '5',
+      });
+      const eventMessage = $t('wordCount.view.objective.nano.notStarted');
+      expect(result.message).toBe(
+        [baseMessage, increaseMessage, progressMessage, eventMessage].join(' ')
       );
-      expect(result.message).toContain(`Dès que le MoMo commence`);
     });
   });
 
