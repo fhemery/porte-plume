@@ -9,6 +9,7 @@
     "commitlint": "commitlint",
     "lint": "nx run-many --target=lint --all",
     "nx": "nx",
+    "prepare": "husky",
     "test": "nx run-many --target=test --all"
   },
   "private": true,
