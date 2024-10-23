@@ -4,13 +4,26 @@ import { InMemoryCountStorageService } from '../../infrastructure/count-storage/
 import { getTag } from './test-utils';
 import { $t } from '../../domain';
 
-describe('Compte interaction', () => {
+describe('Count command', () => {
   let socketInteractionAdapter: SocketInteractionAdapter;
 
   beforeEach(() => {
     socketInteractionAdapter = new SocketInteractionAdapter(
       new InMemoryCountStorageService()
     );
+  });
+
+  describe('unknown subcommand', () => {
+    it('should reply with error message on unknown subcommand', async () => {
+      const interaction = InteractionBuilder.Default(
+        'compte',
+        'unknown'
+      ).build();
+
+      const result = await socketInteractionAdapter.process(interaction);
+
+      expect(result.message).toBe($t('wordCount.unknownSubCommand'));
+    });
   });
 
   describe('[ajoute] when user wants to add words', () => {

@@ -4,7 +4,7 @@ import { WordCount } from '../../../model/count';
 import { utils } from '../../../model/utils';
 import { $t } from '../../../model';
 
-export class CountUsecases {
+export class CountCommand {
   constructor(private readonly _countStorage: CountStoragePort) {}
 
   process(interaction: Interaction): Promise<InteractionResponse> {
@@ -18,7 +18,7 @@ export class CountUsecases {
       case 'déclare':
         return this.setWordCount(interaction);
       default:
-        return Promise.resolve({ message: '[Compte] Sous-commande inconnue!' });
+        return Promise.resolve({ message: $t('wordCount.unknownSubCommand') });
     }
   }
 

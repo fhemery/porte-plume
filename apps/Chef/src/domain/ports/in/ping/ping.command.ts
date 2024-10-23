@@ -2,7 +2,7 @@ import { Interaction, InteractionResponse } from '../../../model/interaction';
 import { utils } from '../../../model/utils';
 import { $t } from '../../../model';
 
-export class PingUsecases {
+export class PingCommand {
   ping(interaction: Interaction): Promise<InteractionResponse> {
     const prefix = interaction.guildId ? utils.getTag(interaction.user.id) : '';
 

@@ -1,4 +1,5 @@
 export const frTranslations = {
+  unknownCommand: 'Commande inconnue !',
   ping: {
     command: {
       name: 'coucou',
@@ -76,6 +77,7 @@ export const frTranslations = {
           'Ok, on repart de 0. Un nouveau jour, une nouvelle résolution !',
       },
     },
+    unknownSubCommand: '[Compte] Sous-commande inconnue !',
     view: {
       baseMessage: 'Total de mots : {{nbWords}}.',
       progress: 'Progression : {{nbWords}} / {{objective}} ({{progress}}%).',
