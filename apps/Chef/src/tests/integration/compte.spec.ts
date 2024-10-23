@@ -385,54 +385,6 @@ describe('Compte interaction', () => {
     });
   });
 
-  describe('[reset] when user wants to reset word count', () => {
-    it('should tell count has been reset', async () => {
-      // Arrange
-      const interaction = InteractionBuilder.Default('compte', 'reset')
-        .withUser('bob')
-        .build();
-
-      // Act
-      const result = await socketInteractionAdapter.process(interaction);
-
-      // Assert
-      expect(result.message).toBe('Réinitialisation du décompte');
-    });
-
-    it('should reset the count to 0', async () => {
-      // Arrange
-      const addWord = InteractionBuilder.Default('compte', 'ajoute')
-        .withNumberOption('nombre-de-mots', 5)
-        .build();
-      const resetWord = InteractionBuilder.Default('compte', 'reset').build();
-      const viewWord = InteractionBuilder.Default('compte', 'voir').build();
-
-      // Act
-      await socketInteractionAdapter.process(addWord);
-      await socketInteractionAdapter.process(resetWord);
-
-      const result = await socketInteractionAdapter.process(viewWord);
-      // Assert
-      expect(result.message).toContain(': 0');
-    });
-
-    it('should tag user if message comes from guild', async () => {
-      // Arrange
-      const interaction = InteractionBuilder.Default('compte', 'reset')
-        .withUser('bob')
-        .withGuild('1234')
-        .build();
-
-      // Act
-      const result = await socketInteractionAdapter.process(interaction);
-
-      // Assert
-      expect(result.message).toBe(
-        `${getTag(interaction)}Réinitialisation du décompte`
-      );
-    });
-  });
-
   describe('[objectif] when user wants to set an objective', () => {
     it('should confirm that objective has been sent', async () => {
       const interaction = InteractionBuilder.Default('compte', 'objectif')

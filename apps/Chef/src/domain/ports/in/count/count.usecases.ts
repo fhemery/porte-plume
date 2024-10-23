@@ -13,8 +13,6 @@ export class CountUsecases {
         return this.add(interaction);
       case 'voir':
         return this.view(interaction);
-      case 'reset':
-        return this.reset(interaction);
       case 'objectif':
         return this.setObjective(interaction);
       case 'déclare':
@@ -41,20 +39,6 @@ export class CountUsecases {
         initial: existingCount.count.toString(10),
         total: newCount.count.toString(10),
       })}${suffix}`,
-    });
-  }
-
-  private async reset(interaction: Interaction) {
-    const userId = interaction.user.id;
-    const existingCount = await this._countStorage.getCount(userId);
-    const newCount = existingCount.reset();
-
-    await this._countStorage.saveCount(userId, newCount);
-
-    const prefix = interaction.guildId ? utils.getTag(userId) : '';
-
-    return Promise.resolve({
-      message: `${prefix}Réinitialisation du décompte`,
     });
   }
 
