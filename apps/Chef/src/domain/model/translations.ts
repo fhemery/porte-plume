@@ -25,6 +25,11 @@ export function $t(
     }
   }
 
+  if (translations && Array.isArray(translations)) {
+    translations =
+      translations[Math.floor(Math.random() * translations.length)];
+  }
+
   if (translations && typeof translations === 'string') {
     return translations.replace(
       /\{\{(.*?)}}/g,

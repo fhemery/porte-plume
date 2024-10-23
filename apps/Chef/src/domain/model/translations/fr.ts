@@ -5,7 +5,7 @@ export const frTranslations = {
       name: 'coucou',
       description: 'Dit bonjour',
     },
-    response: 'Coucou !',
+    response: ['Coucou !', 'Salut !', 'Quoi de neuf ?'],
   },
   wordCount: {
     command: {
