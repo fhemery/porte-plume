@@ -1,6 +1,7 @@
 import { SocketInteractionAdapter } from '../../infrastructure/socket-interaction/socket-interaction-adapter';
 import { InteractionBuilder } from './interaction-builder';
 import { getTag } from './test-utils';
+import { $t } from '../../domain';
 
 describe('Ping interaction', () => {
   let socketInteractionAdapter: SocketInteractionAdapter;
@@ -14,7 +15,7 @@ describe('Ping interaction', () => {
 
     const result = await socketInteractionAdapter.process(interaction);
 
-    expect(result.message).toBe('Pong!');
+    expect(result.message).toBe($t('ping.response'));
   });
 
   it('should reply with highlight when message is coming from a guild', async () => {
@@ -24,6 +25,6 @@ describe('Ping interaction', () => {
       .build();
     const result = await socketInteractionAdapter.process(interaction);
 
-    expect(result.message).toBe(`${getTag(interaction)}Pong!`);
+    expect(result.message).toBe(`${getTag(interaction)}${$t('ping.response')}`);
   });
 });
