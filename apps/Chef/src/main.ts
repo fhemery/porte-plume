@@ -9,6 +9,7 @@ import {
 import { config } from 'dotenv';
 import { SocketInteractionAdapter } from './infrastructure/socket-interaction/socket-interaction-adapter';
 import { FiledbCountStorageService } from './infrastructure/count-storage/filedb-count-storage.service';
+import { $t } from './domain';
 
 config(); // Load environment variables
 
@@ -17,58 +18,79 @@ const token = process.env.DISCORD_TOKEN;
 const clientId = process.env.APP_ID;
 
 const pingCommand = new SlashCommandBuilder()
-  .setName('ping')
-  .setDescription('Replies with Pong!');
+  .setName($t('ping.command.name'))
+  .setDescription($t('ping.command.description'));
 const wordCountCommand = new SlashCommandBuilder()
-  .setName('compte')
-  .setDescription('Gère le décompte des mots')
+  .setName($t('wordCount.command.name'))
+  .setDescription($t('wordCount.command.description'))
   .addSubcommand((subcommand) =>
     subcommand
-      .setName('ajoute')
-      .setDescription('Ajoute un compte de mots au décompte')
+      .setName($t('wordCount.command.subCommands.add.name'))
+      .setDescription($t('wordCount.command.subCommands.add.description'))
       .addNumberOption((option) =>
         option
-          .setName('nombre-de-mots')
-          .setDescription('Le nombre de mots à ajouter')
+          .setName(
+            $t('wordCount.command.subCommands.add.options.wordCount.name')
+          )
+          .setDescription(
+            $t(
+              'wordCount.command.subCommands.add.options.wordCount.description'
+            )
+          )
           .setRequired(true)
       )
   )
   .addSubcommand((subcommand) =>
     subcommand
-      .setName('objectif')
-      .setDescription("Fixe l'objectif de mots à atteindre")
+      .setName($t('wordCount.command.subCommands.objective.name'))
+      .setDescription($t('wordCount.command.subCommands.objective.description'))
       .addNumberOption((option) =>
         option
-          .setName('nombre-de-mots')
-          .setDescription('Le nombre de mots cible. 0 pour annuler')
+          .setName(
+            $t('wordCount.command.subCommands.objective.options.wordCount.name')
+          )
+          .setDescription(
+            $t(
+              'wordCount.command.subCommands.objective.options.wordCount.description'
+            )
+          )
           .setRequired(true)
       )
       .addStringOption((option) =>
         option
-          .setName('évènement')
+          .setName(
+            $t('wordCount.command.subCommands.objective.options.event.name')
+          )
           .setDescription(
-            "le nom de l'événement associé. Valeur possible : MoMo"
+            $t(
+              'wordCount.command.subCommands.objective.options.event.description'
+            )
           )
           .setRequired(false)
           .addChoices([{ name: 'MoMo', value: 'MoMo' }])
       )
   )
   .addSubcommand((subcommand) =>
-    subcommand.setName('reset').setDescription('Réinitialise le décompte')
-  )
-  .addSubcommand((subcommand) =>
     subcommand
-      .setName('déclare')
-      .setDescription('Déclare un nombre de mots. 0 pour réinitialiser')
+      .setName($t('wordCount.command.subCommands.declare.name'))
+      .setDescription($t('wordCount.command.subCommands.declare.description'))
       .addNumberOption((option) =>
         option
-          .setName('nombre-de-mots')
-          .setDescription('Le nombre de mots cible. 0 pour réinitialiser')
+          .setName(
+            $t('wordCount.command.subCommands.declare.options.wordCount.name')
+          )
+          .setDescription(
+            $t(
+              'wordCount.command.subCommands.declare.options.wordCount.description'
+            )
+          )
           .setRequired(true)
       )
   )
   .addSubcommand((subcommand) =>
-    subcommand.setName('voir').setDescription('Voir le décompte')
+    subcommand
+      .setName($t('wordCount.command.subCommands.view.name'))
+      .setDescription($t('wordCount.command.subCommands.view.description'))
   );
 
 const rest = new REST({ version: '10' }).setToken(token!);
