@@ -28,7 +28,7 @@ export class CountUsecases {
 
     await this._countStorage.saveCount(userId, newCount);
 
-    const prefix = interaction.guildId ? `@${userId} ` : '';
+    const prefix = interaction.guildId ? `<@${userId}> ` : '';
     const suffix = this.computeReportSuffix(newCount);
 
     return Promise.resolve({
@@ -43,7 +43,7 @@ export class CountUsecases {
 
     await this._countStorage.saveCount(userId, newCount);
 
-    const prefix = interaction.guildId ? `@${userId} ` : '';
+    const prefix = interaction.guildId ? `<@${userId}> ` : '';
 
     return Promise.resolve({
       message: `${prefix}Réinitialisation du décompte`,
@@ -54,7 +54,7 @@ export class CountUsecases {
     const userId = interaction.user.id;
     const existingCount = await this._countStorage.getCount(userId);
 
-    const prefix = interaction.guildId ? `@${userId} ` : '';
+    const prefix = interaction.guildId ? `<@${userId}> ` : '';
     const suffix = this.computeReportSuffix(existingCount);
 
     return Promise.resolve({
