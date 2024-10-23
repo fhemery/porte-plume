@@ -12,7 +12,7 @@ const translationsMap = {
 
 export function $t(
   template: TranslationKey,
-  placeholders: { [key: string]: string } = {},
+  placeholders: { [key: string]: string | number } = {},
   lang: 'fr' | 'en' = 'fr'
 ): string {
   let translations = translationsMap[lang];
@@ -27,8 +27,8 @@ export function $t(
 
   if (translations && typeof translations === 'string') {
     return translations.replace(
-      /\{\{(.*?)\}\}/g,
-      (_, key) => placeholders[key.trim()] || ''
+      /\{\{(.*?)}}/g,
+      (_, key) => placeholders[key.trim()].toString() || ''
     );
   }
 

@@ -35,9 +35,9 @@ export class CountCommand {
 
     return Promise.resolve({
       message: `${prefix}${$t('wordCount.add.success', {
-        nbWords: nbWords.toString(10),
-        initial: existingCount.count.toString(10),
-        total: newCount.count.toString(10),
+        nbWords: nbWords,
+        initial: existingCount.count,
+        total: newCount.count,
       })}${suffix}`,
     });
   }
@@ -50,7 +50,7 @@ export class CountCommand {
     const suffix = this.computeReportSuffix(existingCount);
 
     const message = $t('wordCount.view.baseMessage', {
-      nbWords: existingCount.count.toString(10),
+      nbWords: existingCount.count,
     });
     const fullMessage = [`${prefix}${message}`, ...suffix].join(' ');
     return Promise.resolve({
@@ -76,7 +76,7 @@ export class CountCommand {
 
     return Promise.resolve({
       message: $t('wordCount.objective.set.message', {
-        nbWords: nbWords.toString(10),
+        nbWords: nbWords,
       }),
     });
   }
@@ -89,9 +89,9 @@ export class CountCommand {
       (existingCount.count / existingCount.objective) * 100
     );
     const progressStr = $t('wordCount.view.progress', {
-      nbWords: existingCount.count.toString(10),
-      objective: existingCount.objective.toString(10),
-      progress: ratio.toString(10),
+      nbWords: existingCount.count,
+      objective: existingCount.objective,
+      progress: ratio,
     });
 
     const eventSuffix = this.getMoMoDedicatedSuffix(existingCount, ratio);
@@ -117,7 +117,7 @@ export class CountCommand {
 
     const eventSuffix = [
       $t('wordCount.view.objective.nano.started', {
-        ratio: expectedRatio.toString(10),
+        ratio: expectedRatio,
       }),
     ];
 
@@ -152,13 +152,11 @@ export class CountCommand {
       };
     }
 
-    const body = [
-      $t('wordCount.view.baseMessage', { nbWords: nbWords.toString(10) }),
-    ];
+    const body = [$t('wordCount.view.baseMessage', { nbWords: nbWords })];
     if (nbWords > existingCount.count) {
       body.push(
         $t('wordCount.set.increase.message', {
-          nbWords: (nbWords - existingCount.count).toString(10),
+          nbWords: nbWords - existingCount.count,
         })
       );
     }
