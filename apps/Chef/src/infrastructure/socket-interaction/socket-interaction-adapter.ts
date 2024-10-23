@@ -18,9 +18,9 @@ export class SocketInteractionAdapter {
 
   async process(interaction: Interaction): Promise<InteractionResponse> {
     switch (interaction.commandName) {
-      case 'ping':
+      case $t('ping.command.name'):
         return await this.pingCommand.ping(interaction);
-      case 'compte':
+      case $t('wordCount.command.name'):
         return await this.countCommand.process(interaction);
       default:
         return { message: $t('unknownCommand') };

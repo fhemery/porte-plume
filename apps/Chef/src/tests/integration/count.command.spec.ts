@@ -4,6 +4,12 @@ import { InMemoryCountStorageService } from '../../infrastructure/count-storage/
 import { getTag } from './test-utils';
 import { $t } from '../../domain';
 
+const countCommand = $t('wordCount.command.name');
+const addSubcommand = $t('wordCount.command.subCommands.add.name');
+const objectiveSubcommand = $t('wordCount.command.subCommands.objective.name');
+const viewSubcommand = $t('wordCount.command.subCommands.view.name');
+const declareSubcommand = $t('wordCount.command.subCommands.declare.name');
+
 describe('Count command', () => {
   let socketInteractionAdapter: SocketInteractionAdapter;
 
@@ -16,7 +22,7 @@ describe('Count command', () => {
   describe('unknown subcommand', () => {
     it('should reply with error message on unknown subcommand', async () => {
       const interaction = InteractionBuilder.Default(
-        'compte',
+        countCommand,
         'unknown'
       ).build();
 
@@ -29,7 +35,10 @@ describe('Count command', () => {
   describe('[ajoute] when user wants to add words', () => {
     it('should initialize a count if user did not have any', async () => {
       // Arrange
-      const interaction = InteractionBuilder.Default('compte', 'ajoute')
+      const interaction = InteractionBuilder.Default(
+        countCommand,
+        addSubcommand
+      )
         .withNumberOption('nombre-de-mots', 5)
         .build();
 
@@ -44,7 +53,10 @@ describe('Count command', () => {
 
     it('should add to existing count if user has one', async () => {
       // Arrange
-      const interaction = InteractionBuilder.Default('compte', 'ajoute')
+      const interaction = InteractionBuilder.Default(
+        countCommand,
+        addSubcommand
+      )
         .withUser('bob')
         .withNumberOption('nombre-de-mots', 5)
         .build();
@@ -64,7 +76,10 @@ describe('Count command', () => {
 
     it('should tag user if command is launched from a guild', async () => {
       // Arrange
-      const interaction = InteractionBuilder.Default('compte', 'ajoute')
+      const interaction = InteractionBuilder.Default(
+        countCommand,
+        addSubcommand
+      )
         .withGuild('1234')
         .withNumberOption('nombre-de-mots', 5)
         .build();
@@ -84,10 +99,13 @@ describe('Count command', () => {
     describe('when user has defined an objective', () => {
       it('should give additional information regarding the objective', async () => {
         // Arrange
-        const objective = InteractionBuilder.Default('compte', 'objectif')
+        const objective = InteractionBuilder.Default(
+          countCommand,
+          objectiveSubcommand
+        )
           .withNumberOption('nombre-de-mots', 100)
           .build();
-        const addWord = InteractionBuilder.Default('compte', 'ajoute')
+        const addWord = InteractionBuilder.Default(countCommand, addSubcommand)
           .withNumberOption('nombre-de-mots', 5)
           .build();
 
@@ -109,11 +127,11 @@ describe('Count command', () => {
   describe('[voir] when user wants to see total of words', () => {
     it('should tell user how many words they have', async () => {
       // Arrange
-      const addWord = InteractionBuilder.Default('compte', 'ajoute')
+      const addWord = InteractionBuilder.Default(countCommand, addSubcommand)
         .withUser('bob')
         .withNumberOption('nombre-de-mots', 5)
         .build();
-      const viewWord = InteractionBuilder.Default('compte', 'voir')
+      const viewWord = InteractionBuilder.Default(countCommand, viewSubcommand)
         .withUser('bob')
         .build();
 
@@ -131,7 +149,10 @@ describe('Count command', () => {
 
     it('should say 0 by default', async () => {
       // Arrange
-      const interaction = InteractionBuilder.Default('compte', 'voir')
+      const interaction = InteractionBuilder.Default(
+        countCommand,
+        viewSubcommand
+      )
         .withUser('bob')
         .build();
 
@@ -147,7 +168,10 @@ describe('Count command', () => {
 
     it('should tag user if message comes from guild', async () => {
       // Arrange
-      const interaction = InteractionBuilder.Default('compte', 'voir')
+      const interaction = InteractionBuilder.Default(
+        countCommand,
+        viewSubcommand
+      )
         .withUser('bob')
         .withGuild('1234')
         .build();
@@ -164,14 +188,20 @@ describe('Count command', () => {
 
     describe('when user has set an objective', () => {
       it('should return count vs ratio and objective', async () => {
-        const objective = InteractionBuilder.Default('compte', 'objectif')
+        const objective = InteractionBuilder.Default(
+          countCommand,
+          objectiveSubcommand
+        )
           .withNumberOption('nombre-de-mots', 500)
           .build();
-        const addWord = InteractionBuilder.Default('compte', 'ajoute')
+        const addWord = InteractionBuilder.Default(countCommand, addSubcommand)
           .withNumberOption('nombre-de-mots', 100)
           .build();
 
-        const viewWord = InteractionBuilder.Default('compte', 'voir').build();
+        const viewWord = InteractionBuilder.Default(
+          countCommand,
+          viewSubcommand
+        ).build();
 
         await socketInteractionAdapter.process(objective);
         await socketInteractionAdapter.process(addWord);
@@ -188,7 +218,10 @@ describe('Count command', () => {
 
     describe('when user has set MoMo has objective', () => {
       beforeEach(async () => {
-        const objective = InteractionBuilder.Default('compte', 'objectif')
+        const objective = InteractionBuilder.Default(
+          countCommand,
+          objectiveSubcommand
+        )
           .withNumberOption('nombre-de-mots', 500)
           .withStringOption('évènement', 'MoMo')
           .build();
@@ -197,7 +230,10 @@ describe('Count command', () => {
 
       it('should warn that challenge has not started', async () => {
         jest.useFakeTimers().setSystemTime(new Date('2024-10-10'));
-        const viewWord = InteractionBuilder.Default('compte', 'voir').build();
+        const viewWord = InteractionBuilder.Default(
+          countCommand,
+          viewSubcommand
+        ).build();
 
         await socketInteractionAdapter.process(viewWord);
         const result = await socketInteractionAdapter.process(viewWord);
@@ -217,11 +253,17 @@ describe('Count command', () => {
       it('should input a ratio if we are in November', async () => {
         jest.useFakeTimers().setSystemTime(new Date('2024-11-10'));
 
-        const objective = InteractionBuilder.Default('compte', 'objectif')
+        const objective = InteractionBuilder.Default(
+          countCommand,
+          objectiveSubcommand
+        )
           .withNumberOption('nombre-de-mots', 500)
           .withStringOption('évènement', 'MoMo')
           .build();
-        const viewWord = InteractionBuilder.Default('compte', 'voir').build();
+        const viewWord = InteractionBuilder.Default(
+          countCommand,
+          viewSubcommand
+        ).build();
 
         await socketInteractionAdapter.process(objective);
         const result = await socketInteractionAdapter.process(viewWord);
@@ -256,17 +298,26 @@ describe('Count command', () => {
           const targetWordCount = 50000;
           jest.useFakeTimers().setSystemTime(new Date('2024-11-10'));
 
-          const objective = InteractionBuilder.Default('compte', 'objectif')
+          const objective = InteractionBuilder.Default(
+            countCommand,
+            objectiveSubcommand
+          )
             .withNumberOption('nombre-de-mots', targetWordCount)
             .withStringOption('évènement', 'MoMo')
             .build();
-          const addWord = InteractionBuilder.Default('compte', 'ajoute')
+          const addWord = InteractionBuilder.Default(
+            countCommand,
+            addSubcommand
+          )
             .withNumberOption(
               'nombre-de-mots',
               Math.round(targetWordCount * (0.33 + ratio / 100))
             )
             .build();
-          const viewWord = InteractionBuilder.Default('compte', 'voir').build();
+          const viewWord = InteractionBuilder.Default(
+            countCommand,
+            viewSubcommand
+          ).build();
 
           await socketInteractionAdapter.process(objective);
           await socketInteractionAdapter.process(addWord);
@@ -290,7 +341,10 @@ describe('Count command', () => {
   describe('[déclare] Setting the word count', () => {
     it('should tell user that count has been set', async () => {
       // Arrange
-      const interaction = InteractionBuilder.Default('compte', 'déclare')
+      const interaction = InteractionBuilder.Default(
+        countCommand,
+        declareSubcommand
+      )
         .withNumberOption('nombre-de-mots', 5)
         .build();
 
@@ -304,14 +358,17 @@ describe('Count command', () => {
 
     it('should set the count to the number given', async () => {
       // Arrange
-      const interaction = InteractionBuilder.Default('compte', 'déclare')
+      const interaction = InteractionBuilder.Default(
+        countCommand,
+        declareSubcommand
+      )
         .withNumberOption('nombre-de-mots', 5)
         .build();
 
       // Act
       await socketInteractionAdapter.process(interaction);
       const result = await socketInteractionAdapter.process(
-        InteractionBuilder.Default('compte', 'voir').build()
+        InteractionBuilder.Default(countCommand, viewSubcommand).build()
       );
 
       // Assert
@@ -320,7 +377,10 @@ describe('Count command', () => {
 
     it('should tag user if message comes from guild', async () => {
       // Arrange
-      const interaction = InteractionBuilder.Default('compte', 'déclare')
+      const interaction = InteractionBuilder.Default(
+        countCommand,
+        declareSubcommand
+      )
         .withUser('bob')
         .withGuild('1234')
         .withNumberOption('nombre-de-mots', 5)
@@ -335,10 +395,16 @@ describe('Count command', () => {
 
     it('should add the number of added words compared to previous declaration if number is positive', async () => {
       // Arrange
-      const interaction = InteractionBuilder.Default('compte', 'déclare')
+      const interaction = InteractionBuilder.Default(
+        countCommand,
+        declareSubcommand
+      )
         .withNumberOption('nombre-de-mots', 5)
         .build();
-      const addWord = InteractionBuilder.Default('compte', 'déclare')
+      const addWord = InteractionBuilder.Default(
+        countCommand,
+        declareSubcommand
+      )
         .withNumberOption('nombre-de-mots', 10)
         .build();
 
@@ -357,7 +423,10 @@ describe('Count command', () => {
     });
 
     it('should set a special message if user declares 0 words', async () => {
-      const declaration = InteractionBuilder.Default('compte', 'déclare')
+      const declaration = InteractionBuilder.Default(
+        countCommand,
+        declareSubcommand
+      )
         .withNumberOption('nombre-de-mots', 0)
         .build();
       const result = await socketInteractionAdapter.process(declaration);
@@ -369,11 +438,17 @@ describe('Count command', () => {
     it('should add objective data if an objective is defined', async () => {
       // Arrange
       jest.useFakeTimers().setSystemTime(new Date('2024-10-10'));
-      const objective = InteractionBuilder.Default('compte', 'objectif')
+      const objective = InteractionBuilder.Default(
+        countCommand,
+        objectiveSubcommand
+      )
         .withNumberOption('nombre-de-mots', 100)
         .withStringOption('évènement', 'MoMo')
         .build();
-      const declaration = InteractionBuilder.Default('compte', 'déclare')
+      const declaration = InteractionBuilder.Default(
+        countCommand,
+        declareSubcommand
+      )
         .withNumberOption('nombre-de-mots', 5)
         .build();
 
@@ -400,7 +475,10 @@ describe('Count command', () => {
 
   describe('[objectif] when user wants to set an objective', () => {
     it('should confirm that objective has been sent', async () => {
-      const interaction = InteractionBuilder.Default('compte', 'objectif')
+      const interaction = InteractionBuilder.Default(
+        countCommand,
+        objectiveSubcommand
+      )
         .withNumberOption('nombre-de-mots', 100)
         .build();
 
@@ -414,7 +492,10 @@ describe('Count command', () => {
 
     it('should send back a specific message is count is 0', async () => {
       // Arrange
-      const interaction = InteractionBuilder.Default('compte', 'objectif')
+      const interaction = InteractionBuilder.Default(
+        countCommand,
+        objectiveSubcommand
+      )
         .withNumberOption('nombre-de-mots', 0)
         .build();
 

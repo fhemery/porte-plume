@@ -5,13 +5,14 @@ import { $t } from '../../domain';
 
 describe('Ping interaction', () => {
   let socketInteractionAdapter: SocketInteractionAdapter;
+  const ping = $t('ping.command.name');
 
   beforeEach(() => {
     socketInteractionAdapter = new SocketInteractionAdapter();
   });
 
   it('should reply with pong when interaction is directed to user', async () => {
-    const interaction = InteractionBuilder.Default('ping').build();
+    const interaction = InteractionBuilder.Default(ping).build();
 
     const result = await socketInteractionAdapter.process(interaction);
 
@@ -19,7 +20,7 @@ describe('Ping interaction', () => {
   });
 
   it('should reply with highlight when message is coming from a guild', async () => {
-    const interaction = InteractionBuilder.Default('ping')
+    const interaction = InteractionBuilder.Default(ping)
       .withUser('bob')
       .withGuild('1234')
       .build();

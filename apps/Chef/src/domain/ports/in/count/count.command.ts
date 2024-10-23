@@ -9,13 +9,13 @@ export class CountCommand {
 
   process(interaction: Interaction): Promise<InteractionResponse> {
     switch (interaction.options.getSubcommand()) {
-      case 'ajoute':
+      case $t('wordCount.command.subCommands.add.name'):
         return this.add(interaction);
-      case 'voir':
+      case $t('wordCount.command.subCommands.view.name'):
         return this.view(interaction);
-      case 'objectif':
+      case $t('wordCount.command.subCommands.objective.name'):
         return this.setObjective(interaction);
-      case 'déclare':
+      case $t('wordCount.command.subCommands.declare.name'):
         return this.setWordCount(interaction);
       default:
         return Promise.resolve({ message: $t('wordCount.unknownSubCommand') });
