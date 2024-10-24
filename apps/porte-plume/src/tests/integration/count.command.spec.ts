@@ -93,7 +93,7 @@ describe('Count command', () => {
         initial: '0',
         total: '5',
       });
-      expect(result.message).toBe(`${getTag(interaction)}${expectedMessage}`);
+      expect(result.message).toBe(`${getTag(interaction)} ${expectedMessage}`);
     });
 
     describe('when user has defined an objective', () => {
@@ -183,7 +183,7 @@ describe('Count command', () => {
       const expectedMessage = $t('wordCount.view.baseMessage', {
         nbWords: '0',
       });
-      expect(result.message).toBe(`${getTag(interaction)}${expectedMessage}`);
+      expect(result.message).toBe(`${getTag(interaction)} ${expectedMessage}`);
     });
 
     describe('when user has set an objective', () => {
@@ -512,6 +512,28 @@ describe('Count command', () => {
       // Assert
       const expectedMessage = $t('wordCount.objective.reset.message');
       expect(result.message).toBe(expectedMessage);
+    });
+
+    it('should tag user when message is posted in guild', async () => {
+      // Arrange
+      const interaction = InteractionBuilder.Default(
+        countCommand,
+        objectiveSubcommand
+      )
+        .withNumberOption('nombre-de-mots', 100)
+        .withGuild('1234')
+        .build();
+
+      // Act
+      const result = await socketInteractionAdapter.process(interaction);
+
+      // Assert
+      const expectedMessage = $t('wordCount.objective.set.message', {
+        nbWords: '100',
+      });
+      expect(result.message).toContain(
+        `${getTag(interaction)} ${expectedMessage}`
+      );
     });
   });
 });

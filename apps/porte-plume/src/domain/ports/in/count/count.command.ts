@@ -30,15 +30,16 @@ export class CountCommand {
 
     await this._countStorage.saveCount(userId, newCount);
 
-    const prefix = interaction.guildId ? utils.getTag(userId) : '';
+    const prefix = this.computePrefix(interaction);
     const suffix = this.computeReportSuffix(newCount);
 
+    const message = $t('wordCount.add.success', {
+      nbWords: nbWords,
+      initial: existingCount.count,
+      total: newCount.count,
+    });
     return Promise.resolve({
-      message: `${prefix}${$t('wordCount.add.success', {
-        nbWords: nbWords,
-        initial: existingCount.count,
-        total: newCount.count,
-      })}${suffix}`,
+      message: [...prefix, message, ...suffix].join(' '),
     });
   }
 
@@ -46,15 +47,14 @@ export class CountCommand {
     const userId = interaction.user.id;
     const existingCount = await this._countStorage.getCount(userId);
 
-    const prefix = interaction.guildId ? utils.getTag(userId) : '';
+    const prefix = this.computePrefix(interaction);
     const suffix = this.computeReportSuffix(existingCount);
 
     const message = $t('wordCount.view.baseMessage', {
       nbWords: existingCount.count,
     });
-    const fullMessage = [`${prefix}${message}`, ...suffix].join(' ');
     return Promise.resolve({
-      message: fullMessage,
+      message: [...prefix, message, ...suffix].join(' '),
     });
   }
 
@@ -68,17 +68,26 @@ export class CountCommand {
     const newCount = existingCount.setObjective(nbWords, eventName);
     await this._countStorage.saveCount(userId, newCount);
 
+    const prefix = this.computePrefix(interaction);
+
     if (nbWords === 0) {
       return Promise.resolve({
-        message: $t('wordCount.objective.reset.message'),
+        message: [...prefix, $t('wordCount.objective.reset.message')].join(' '),
       });
     }
 
     return Promise.resolve({
-      message: $t('wordCount.objective.set.message', {
-        nbWords: nbWords,
-      }),
+      message: [
+        ...prefix,
+        $t('wordCount.objective.set.message', {
+          nbWords: nbWords,
+        }),
+      ].join(' '),
     });
+  }
+
+  private computePrefix(interaction: Interaction) {
+    return interaction.guildId ? [utils.getTag(interaction.user.id)] : [];
   }
 
   private computeReportSuffix(existingCount: WordCount): string[] {
@@ -144,7 +153,7 @@ export class CountCommand {
     const newCount = existingCount.setWordCount(nbWords);
     await this._countStorage.saveCount(userId, newCount);
 
-    const prefix = interaction.guildId ? [utils.getTag(userId)] : [];
+    const prefix = this.computePrefix(interaction);
 
     if (nbWords === 0) {
       return {

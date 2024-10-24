@@ -1,3 +1,3 @@
 export const utils = {
-  getTag: (userId: string) => `<@${userId}> `,
+  getTag: (userId: string) => `<@${userId}>`,
 };
