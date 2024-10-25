@@ -66,8 +66,11 @@ const wordCountCommand = new SlashCommandBuilder()
               'wordCount.command.subCommands.objective.options.event.description'
             )
           )
-          .setRequired(false)
-          .addChoices([{ name: 'MoMo', value: 'MoMo' }])
+          .setRequired(true)
+          .addChoices([
+            { name: 'MoMo', value: 'MoMo' },
+            { name: 'Autre', value: 'other' },
+          ])
       )
   )
   .addSubcommand((subcommand) =>
